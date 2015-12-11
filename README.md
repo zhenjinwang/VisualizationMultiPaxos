@@ -28,7 +28,7 @@ UI: demo_UI.PNG
     Reload Recent data: loading the last message log of multi-paxos 
     
     Control Bar: 
-          TimeLine: a adjustable time line to control all animations based on time
+          TimeLine: an adjustable time line to control all animations based on time
           Buttons: play, pause, resume, reverse and restart (control the time line)
           Scale Bar: to adjust the speed of animation
           
