@@ -17,7 +17,8 @@ var messagesQueue=[],
     client=1,
     totalServers=8,
     totalCPUTime=0,
-    totalElapseTime=0;
+    totalElapseTime=0,
+    status=false;
 
 // Net Socket to collect messages(buffer stream) from Paxos Driver
 var net = require('net');
@@ -66,8 +67,11 @@ var corsOptions=function(req,callback){
 app.use(cors(corsOptions)); // support cors domain request
 
 app.get('/api/data', function(req, res) {
-    if(totalServers==count_done){
+    if(totalServers==count_done||(leader>1&&totalServers/2<count_done)){
+      console.log(totalServers+' '+count_done+' '+leader);
+      status=false;
       res.json({'data':messagesQueue,'servers':servers,'cpu_time':totalCPUTime/totalServers,'elapse_time':totalElapseTime/totalServers});
+     
     }else{
       res.json({'data':[],'servers':{}});
     }
@@ -77,6 +81,7 @@ app.get('/api/pre/data', function(req, res) {
       res.json({'data':content.data,'servers':content.servers,'cpu_time':content.cpu_time,'elapse_time':content.elapse_time});
 });
 app.get('/api/start/:acceptor/:leader/:replica/:client', function(req, res) {
+    
     acceptor=parseInt(req.params.acceptor),
     leader=parseInt(req.params.leader),
     replica=parseInt(req.params.replica),
@@ -91,7 +96,10 @@ app.get('/api/start/:acceptor/:leader/:replica/:client', function(req, res) {
               {'type':'replica','ports':[]},
               {'type':'client','ports':[]}];
     console.log(acceptor+' '+leader+' '+replica+' '+client);
-    messageFactory.execPaxosDriver(acceptor,leader,replica,client);
+    console.log(count_done+' '+messagesQueue);
+    if(!status)// make sure at most one paxos is running
+        messageFactory.execPaxosDriver(acceptor,leader,replica,client);
+    status=true;
     res.json({'ready':true});
 });
 

@@ -4,29 +4,33 @@ var messages = '',
     elapse_time = 0,
     delay_call = 500;
 
+    
+    
+$("#initpaxos").on("click", function() {
+        initPaxos();
+    });
+$("#reloadpaxos").on("click", function() {
+        reloadPaxos();
+    });
 function initPaxos() {
     visualizer_data = {};
     messages = '';
     servers = '';
-    if (resetUI()) return;
+    resetUI();
     startPaxos();
 }
 
 function resetUI() {
-    if (paxosTimeLine) {
-        /*paxosTimeLine.clear();
-        var parent=document.getElementById('data');
-        while(parent.hasChildNodes()){
-           parent.removeChild(parent.firstChild);
-        }*/
-        location.reload();
-        return true;
+    if (paxosTimeLine!='init') {
+        paxosTimeLine.clear();
+        paxosTimeLine='init';
+        $('#data').empty();
     }
 }
 
 function reloadPaxos() {
     console.log('reloadData');
-    if (resetUI()) return;
+    resetUI();
     var get = $.ajax({
         url: 'http://' + location.hostname + ':5000/api/pre/data',
         method: "GET",
@@ -72,6 +76,7 @@ function startPaxos() {
     acceptors_num = parseInt($('input[name=acceptor]').val());
     leaders_num = parseInt($('input[name=leader]').val());
     clients_num = parseInt($('input[name=client]').val());
+    console.log('start');
     var get = $.ajax({
         url: 'http://' + location.hostname + ':5000/api/start/' +
             acceptors_num + '/' + leaders_num +

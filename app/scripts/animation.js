@@ -3,12 +3,17 @@ var replicas_num = 3,
     acceptors_num = 3,
     leaders_num = 1,
     clients_num = 1,
-    paxosTimeLine;
+    paxosTimeLine='init';
 
 // visualizer
 function visualizer() {
-    CSSPlugin.defaultTransformPerspective = 100;
     var bodyElement = $('#data'); //
+    if (paxosTimeLine!='init') {
+        paxosTimeLine.clear();
+        paxosTimeLine='init';
+        bodyElement.empty();
+    }
+    CSSPlugin.defaultTransformPerspective = 100;    
     // a map which stores the final position of each server
     // key: port         value: {'left':int,'top':int}
     var serversPos = {};
