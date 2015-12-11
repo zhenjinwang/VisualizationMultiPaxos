@@ -15,8 +15,8 @@ Running App:
 
     1)  git clone https://github.com/zhenjinwang/VisualizationMultiPaxos.git
     2)  cd into folder VisualizationMultiPaxos
-    3)  bower install  # to install all bower components based on bower.json
-    4)  npm install # to install all node modules based on package.json
+    3)  npm install # to install all node modules based on package.json
+    4)  bower install  # to install all bower components based on bower.json
     5)  gulp serve # to start the server
     
     This method had been tested on Microsoft Windows 8.1
