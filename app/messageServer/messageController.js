@@ -12,9 +12,14 @@ module.exports=function(){
      this.readData=function(){
           return JSON.parse( fs.readFileSync("app/Data/paxosData.json"));
      }
+     this.killProcess=function(){
+         if(paxos_driver!='init'){
+             paxos_driver.kill('SIGTERM');
+             console.log('kill child process');
+         }
+     }
      this.execPaxosDriver=function(acceptor,leader,replica,client){
-       if(paxos_driver!='init')paxos_driver.kill('SIGTERM');
-       busy=true;
+       this.killProcess();// to make sure previous child process is killed
        paxos_driver=exec('py -m da app/DistAlgoCompiler/distalgo-master/examples/vrpaxos/orig.da '+
                         acceptor+' '+leader+' '+replica+' '+client,function(err,out,code){
                                 console.log('finish');

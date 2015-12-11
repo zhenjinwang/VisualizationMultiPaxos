@@ -24,7 +24,7 @@ var messagesQueue=[],
 var net = require('net');
 var server = net.createServer();
 var controller=require('../messageServer/messageController'),
-    messageFactory=new controller();
+    messageController=new controller();
 
 server.on('connection',function(socket){
   socket.on('data', function(data){
@@ -35,7 +35,7 @@ server.on('connection',function(socket){
        totalCPUTime+=data.message[1],
        totalElapseTime+=data.message[2];
        if(count_done==totalServers){
-         messageFactory.saveData({'data':messagesQueue,'servers':servers,'cpu_time':totalCPUTime/totalServers,'elapse_time':totalElapseTime/totalServers});
+         messageController.saveData({'data':messagesQueue,'servers':servers,'cpu_time':totalCPUTime/totalServers,'elapse_time':totalElapseTime/totalServers});
        }
        console.log('count done'+count_done);
     }else{
@@ -70,14 +70,14 @@ app.get('/api/data', function(req, res) {
     if(totalServers==count_done||(leader>1&&totalServers/2<count_done)){
       console.log(totalServers+' '+count_done+' '+leader);
       status=false;
-      res.json({'data':messagesQueue,'servers':servers,'cpu_time':totalCPUTime/totalServers,'elapse_time':totalElapseTime/totalServers});
-     
+      messageController.killProcess();
+      res.json({'data':messagesQueue,'servers':servers,'cpu_time':totalCPUTime/totalServers,'elapse_time':totalElapseTime/totalServers});     
     }else{
       res.json({'data':[],'servers':{}});
     }
 });
 app.get('/api/pre/data', function(req, res) {
-      var content =messageFactory.readData();
+      var content =messageController.readData();
       res.json({'data':content.data,'servers':content.servers,'cpu_time':content.cpu_time,'elapse_time':content.elapse_time});
 });
 app.get('/api/start/:acceptor/:leader/:replica/:client', function(req, res) {
@@ -98,7 +98,7 @@ app.get('/api/start/:acceptor/:leader/:replica/:client', function(req, res) {
     console.log(acceptor+' '+leader+' '+replica+' '+client);
     console.log(count_done+' '+messagesQueue);
     if(!status)// make sure at most one paxos is running
-        messageFactory.execPaxosDriver(acceptor,leader,replica,client);
+        messageController.execPaxosDriver(acceptor,leader,replica,client);
     status=true;
     res.json({'ready':true});
 });
