@@ -32,7 +32,7 @@ UI: demo_UI.PNG
           Buttons: play, pause, resume, reverse and restart (control the time line)
           Scale Bar: to adjust the speed of animation
           
-    
+  ![alt tag](https://github.com/zhenjinwang/VisualizationMultiPaxos/blob/master/demo_UI.PNG)  
     
 More:
 
