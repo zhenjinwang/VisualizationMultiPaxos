@@ -20,6 +20,19 @@ Running App:
     5)  gulp serve # to start the server
     
     This method had been tested on Microsoft Windows 8.1
+
+UI: demo_UI.PNG
+
+    Input Form: number of Paxos servers to run
+    Initialize Paxos: running the multi-paxos in child process
+    Reload Recent data: loading the last message log of multi-paxos 
+    
+    Control Bar: 
+          TimeLine: a adjustable time line to control all animations based on time
+          Buttons: play, pause, resume, reverse and restart (control the time line)
+          Scale Bar: to adjust the speed of animation
+          
+    
     
 More:
 
