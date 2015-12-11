@@ -1,10 +1,9 @@
 module.exports=function(){
      var exec = require('child_process').exec;
      var paxos_driver='init';
-     var path='cd ../DistAlgoCompiler/distalgo/examples';
      var cmd = 'py -m da ../DistAlgoCompiler/distalgo/examples/vrpaxos/orig.da';
      var fs = require('fs');
-     this.getServers
+
      this.saveData=function(data){
        fs.writeFile('app/Data/paxosData.json',JSON.stringify(data),function(err){
              console.log(err);
