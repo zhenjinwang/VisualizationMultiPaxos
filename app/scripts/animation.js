@@ -8,15 +8,20 @@ var replicas_num = 3,
 // visualizer
 function visualizer() {
     var bodyElement = $('#data'); //
+    
+    //clean UI if needing
     if (paxosTimeLine!='init') {
         paxosTimeLine.clear();
         paxosTimeLine='init';
         bodyElement.empty();
     }
     CSSPlugin.defaultTransformPerspective = 100;    
+    
     // a map which stores the final position of each server
     // key: port         value: {'left':int,'top':int}
+    // using to locate the start and final positions of each message based on the port number
     var serversPos = {};
+    
     // initial value for UI layout
     var className = 111,
         left_offset = 100,
@@ -71,7 +76,9 @@ function visualizer() {
     }
 
     //initialize paxos messages
-    var currentTime = 1.5;
+    var currentTime = 1.5, // the time to start to animate messages
+        time_inc=0.5;// the duration between two different consecutive sets of messages
+        
     for (var i = 0; i < messages.length;) {
         if (messages[i].action == 'send') {
             var j = i + 1;
@@ -99,7 +106,7 @@ function visualizer() {
                     }, currentTime);
                 className++;
             }
-            currentTime += 0.5;
+            currentTime += time_inc;
             i = j;
         } else {
             i++;
