@@ -1,0 +1,401 @@
+import sys
+import time
+import random
+import socket
+import json
+
+NOPS = 10  # number of different operations that the state machine can do
+# operation i maps a state to a pair of new state and result of i on state
+def operation(i): return lambda state: (state+[i], ['result',i,'on',state])
+operations = {i: operation(i) for i in range(NOPS)}
+
+# wrong: all closures get i = NOPS - 1
+# ops = {i: (lambda state: (state+[i], ['res',i]+state)) for i in range(NOPS)}
+
+class WebSocket:
+    def sendToServer(self,message_type,from_port,to_port,message_content,cur_time):
+                        cur_time=(1000*(cur_time))//1
+                        action_type=message_type.split('-')
+                        action=action_type[0]
+                        msg_type='-'
+                        if len(action_type)>1:msg_type=action_type[1]
+                        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                        s.connect(("localhost",6000))
+                        messages=[]
+                        for m in message_content:
+                                    messages.append(m)
+                        if not isinstance(from_port,int):from_port=int(from_port)
+                        if not isinstance(to_port,int):to_port=int(to_port)
+                        dict={'action':action,'type':msg_type,'from':from_port,'to':to_port,'message':messages,'current_time':cur_time}
+                        bs=json.dumps(dict)
+                        s.send(bs.encode('ascii'))
+                        s.close()
+
+
+class Replica(process):
+    def setup(leaders:set, initial_state:list):
+        self.state = initial_state;  self.slot_num = 1
+        self.proposals = set();  self.decisions = set()
+        self.port=self.id.__getstate__()[1][1]
+        self.t1=time.process_time()
+        self.t2=time.time()
+        self.webSocket=WebSocket()
+        self.cur_time=0
+
+    def propose(p):
+        if not some((_, _p) in decisions):
+            # find the maximum used slot number, or 0
+            maxs = max(setof(s, (s, _) in proposals | decisions) or {0})
+            # within the maximum + 1, find smallest not yet used
+            s1 = min(setof(s, s in range(1, maxs + 1 + 1),
+                           not some((_s, _) in proposals | decisions)))
+            proposals.add((s1, p))
+            cur_time=curTime()
+            for leader in leaders:
+                webSocket.sendToServer('send-propose',port,getPort(leader),[s1,processToString(p)],cur_time)
+            send(('propose', s1, p), to= leaders)
+
+    def perform(p):
+        output('### perform', p)
+        client, cid, op = p
+        if some((s, _p) in decisions, has= s < slot_num):
+            slot_num += 1
+        else:
+            output('===', state, op)
+            next, result = operations[op](state)
+            output('===', next, result)
+            state = next; slot_num += 1
+            cur_time=curTime()
+            webSocket.sendToServer('send-response',port,getPort(client),[cid,result],cur_time)
+            send(('response', cid, result), to= client)
+
+
+    def run():
+        cur_time=curTime()
+        webSocket.sendToServer('start',port,port,['replica'],cur_time)
+        output('### start')
+        await(received(('done',)))
+        cur_time=curTime()
+        webSocket.sendToServer('done',port,port,['replica',time.process_time()-t1,cur_time],cur_time)
+        output('terminating')
+
+    def receive(msg= ('request', p)):
+        cur_time=curTime()
+        webSocket.sendToServer('receive-request',getPort(p[0]),port,processToString(p),cur_time)
+        output('###  request', p)
+
+        propose(p)
+
+    def receive(msg= ('decision', s, p)):
+        cur_time=curTime()
+        webSocket.sendToServer('receive-decision',getPort(p[0]),port,[s,processToString(p)],cur_time)
+        output('### decision', s, p)
+        decisions.add((s, p))
+        while some((_slot_num, p1) in decisions):
+            if some((_slot_num, p2) in proposals, has= p2 != p1):
+                propose(p2)
+            perform(p1)
+    def getPort(p):
+        return str(p.__getstate__()[1][1])
+    def processToString(p):
+        mes=[]
+        for m in p:
+            if not isinstance(m,int) and not isinstance(m,str): mes.append(getPort(m))
+            else: mes.append(m)
+        return mes
+    def curTime():
+        return time.time()-t2
+
+class Acceptor(process):
+    def setup():
+        self.ballot_num = None;  self.accepted = set()
+        self.port=self.id.__getstate__()[1][1]
+        self.webSocket=WebSocket()
+        self.t1=time.process_time()
+        self.t2=time.time()
+        self.cur_time=0
+
+    def run():
+        cur_time=curTime()
+        webSocket.sendToServer('start',port,port,['acceptor'],cur_time)
+        output('### start')
+        await(received(('done',)))
+        cur_time=curTime()
+        webSocket.sendToServer('done',port,port,['acceptor',time.process_time()-t1,cur_time],cur_time)
+        output('terminating')
+
+    def receive(msg= m):
+        BOTTOM = (-1, -1);
+        ballot_num = max((setof(b, received(('p1a', _, b))) |
+                          setof(b, received(('p2a', _, b, _, _)))) or {BOTTOM})
+
+    def receive(msg= ('p1a', leader_scout, b)):
+        cur_time=curTime()
+        webSocket.sendToServer('receive-p1a',getPort(b[1]),port,processToString(b),cur_time)
+        output('### p1a', leader_scout, b)
+        cur_time=curTime()
+        webSocket.sendToServer('send-p1b',port,getPort(b[1]),processToString(ballot_num),cur_time)
+        send(('p1b', self.id, ballot_num, accepted), to= leader_scout)
+        output('accept',len(accepted))
+
+
+    def receive(msg= ('p2a', leader_commander, b, s, p)):
+        cur_time=curTime()
+        webSocket.sendToServer('receive-p2a',getPort(b[1]),port,[processToString(b),s,processToString(p)],cur_time)
+        output('### p2a', leader_commander, b, s, p)
+        if b == ballot_num : accepted.add((b, s, p))
+        cur_time=curTime()
+        webSocket.sendToServer('send-p2b',port,getPort(b[1]),processToString(ballot_num),cur_time)
+        send(('p2b', self.id, ballot_num), to= leader_commander)
+
+    def getPort(p):
+        return str(p.__getstate__()[1][1])
+    def processToString(p):
+        mes=[]
+        for m in p:
+            if not isinstance(m,int) and not isinstance(m,str): mes.append(getPort(m))
+            else: mes.append(m)
+        return mes
+    def curTime():
+        return time.time()-t2
+
+class Commander(process):
+    def setup(leader:Leader, acceptors:set, replicas:set,b, s, p):
+        self.webSocket=WebSocket()
+        self.port=getPort(leader)
+        self.t1=time.process_time()
+        self.t2=time.time()
+        self.cur_time=0
+
+    def run():
+        output('### start')
+        cur_time=curTime()
+        for acce in acceptors:
+            webSocket.sendToServer('send-p2a',port,getPort(acce),[s],cur_time)
+        send(('p2a', self.id, b, s, p), to= acceptors)
+
+
+        if await(len(setof(a, received(('p2b', a, _b)))) > len(acceptors)/2):
+            cur_time=curTime()
+            for rep in replicas:
+                webSocket.sendToServer('send-decision',port,getPort(rep),[s],cur_time)
+            send(('decision', s, p), to= replicas)
+
+        elif some(received(('p2b', _, b1)), has= b1 != b):
+            cur_time=curTime()
+            webSocket.sendToServer('send-preempted',port,port,[],cur_time)
+            send(('preempted', b1), to= leader)
+
+    def getPort(p):
+        return str(p.__getstate__()[1][1])
+    def processToString(p):
+        mes=[]
+        for m in p:
+            if not isinstance(m,int) and not isinstance(m,str): mes.append(getPort(m))
+            else: mes.append(m)
+        return mes
+    def curTime():
+        return time.time()-t2
+
+class Scout(process):
+    def setup(leader, acceptors:set, b):
+        self.pvalues = set()
+        self.port=getPort(leader)
+        self.webSocket=WebSocket()
+        self.t1=time.process_time()
+        self.t2=time.time()
+        self.cur_time=0
+
+    def run():
+        output('### start')
+# add sleep
+        time.sleep(random.random()) # next random float in [0.0, 1.0)
+        for acce in acceptors:
+            cur_time=curTime()
+            webSocket.sendToServer('send-p1a',port,getPort(acce),[processToString(b)],cur_time)
+        send(('p1a', self.id, b), to= acceptors)
+
+        if await(len(setof(a, received(('p1b', a, _b, _)))) > len(acceptors)/2):
+            pvalues = setof(v, received(('p1b', _, _b, r)), v in r) #accepted
+            cur_time=curTime()
+            webSocket.sendToServer('send-adopted',port,port,[processToString(b)],cur_time)
+            send(('adopted', b, pvalues), to= leader)
+
+        elif some(received(('p1b', a, b1, _)), has= b1 != b):
+            cur_time=curTime()
+            webSocket.sendToServer('send-preempted',port,port,[],cur_time)
+            send(('preempted', b1), to= leader)
+
+    def getPort(p):
+        return str(p.__getstate__()[1][1])
+    def processToString(p):
+        mes=[]
+        for m in p:
+            if not isinstance(m,int) and not isinstance(m,str): mes.append(getPort(m))
+            else: mes.append(m)
+        return mes
+    def curTime():
+        return time.time()-t2
+
+class Leader(process):
+    def setup(acceptors:set, replicas:set):
+        self.ballot_num = (0, self.id);
+        self.active = False;  self.proposals = set()
+        self.started = set()
+        self.port=self.id.__getstate__()[1][1]
+        self.webSocket=WebSocket()
+        self.t1=time.process_time()
+        self.t2=time.time()
+        self.cur_time=0
+
+    def run():
+        cur_time=curTime()
+        webSocket.sendToServer('start',port,port,['leader'],cur_time)
+        output('### start')
+
+#        start(new(Scout, (self.id, acceptors, ballot_num)))
+        sub = new(Scout, (self.id, acceptors, ballot_num))
+        start(sub); started |= sub
+        await(received(('done',)))
+        for tmp in started: tmp.join()
+        cur_time=curTime()
+        webSocket.sendToServer('done',port,port,['leader',time.process_time()-t1,cur_time],cur_time)
+        output('terminating')
+
+
+    def receive(msg= ('propose', s, p),from_=a):
+        webSocket.sendToServer('receive-propose',port,getPort(a),[s,processToString(p)],cur_time)
+        output('### propose', s, p)
+        if not some((_s, _) in proposals):
+            proposals.add((s,p))
+            if active:
+#                start(new(Commander,
+#                          (self.id, acceptors, replicas, ballot_num, s, p)))
+                sub = new(Commander,
+                          (self.id, acceptors, replicas, ballot_num, s, p))
+                start(sub); started |= sub
+
+    def receive(msg= ('adopted', ballot_num, pvals)):
+        cur_time=curTime()
+        webSocket.sendToServer('receive-adopted',port,port,[processToString(ballot_num)],cur_time)
+        output('### adopted', ballot_num, pvals)
+
+        proposals = circle_plus(proposals, pmax(pvals))
+        for (s, p) in proposals:
+#            start(new(Commander,
+#                      (self.id, acceptors, replicas, ballot_num, s, p)))
+            sub = new(Commander,
+                    (self.id, acceptors, replicas, ballot_num, s, p))
+            start(sub); started |= sub
+        active = True
+
+    def receive(msg= ('preempted', (r1, leader1))):
+        cur_time=curTime()
+        webSocket.sendToServer('receive-preempted',port,port,[],cur_time)
+        if (r1, leader1) > ballot_num:
+            active = False
+            ballot_num = (r1 + 1, self.id)
+#            start(new(Scout, (self.id, acceptors, ballot_num)))
+            sub = new(Scout, (self.id, acceptors, ballot_num))
+            start(sub); started |= sub
+
+    def circle_plus(x, y):
+        return y | setof((s, p), (s, p) in x, not some((_s, _) in y))
+
+    def pmax(pvals):
+        return setof((s, p), (b, s, p) in pvals,
+                     each((b1, _s, _) in pvals, has= b1 <= b))
+    def getPort(p):
+        return str(p.__getstate__()[1][1])
+    def processToString(p):
+        mes=[]
+        for m in p:
+            if not isinstance(m,int) and not isinstance(m,str): mes.append(getPort(m))
+            else: mes.append(m)
+        return mes
+    def curTime():
+        return time.time()-t2
+
+
+class Client(process):
+    def setup(replicas:set, nops:int):
+        self.cid = 0           # command id
+        self.results = dict()  # map of command id to result of command
+        self.count = dict()    # map of command id to number of responses
+        self.port=self.id.__getstate__()[1][1]
+        self.webSocket=WebSocket()
+        self.t1=time.process_time()
+        self.t2=time.time()
+        self.cur_time=0
+
+    def run():
+        cur_time=curTime()
+        webSocket.sendToServer('start',port,port,['client'],cur_time)
+        for i in range(nops):
+            for rep in replicas:
+                cur_time=curTime()
+                webSocket.sendToServer('send-request',port,getPort(rep),[cid],cur_time)
+            send(('request', (self.id, cid, random.randint(0, NOPS-1))),
+                 to= replicas)
+
+            await(cid in results)
+            cur_time=curTime()
+            webSocket.sendToServer('receive-result',port,port,[cid,'result: ',results[cid][1]],cur_time)
+            output('received result', cid, results[cid])
+
+            cid += 1
+        await(each(cid in range(nops), has= count[cid] == len(replicas)))
+        cur_time=curTime()
+        webSocket.sendToServer('done',port,port,['replica',time.process_time()-t1,cur_time],cur_time)
+        output('terminating')
+
+
+    def receive(msg= ('response', cid, result),from_=a):
+        cur_time=curTime()
+        webSocket.sendToServer('receive-response',getPort(a),port,[cid,result],cur_time)
+        output('### response', cid, result)
+
+        if cid not in results:
+            results[cid] = result
+        elif results[cid] != result:
+            output('different result', cid, result, 'than', results[cid])
+        count[cid] = 1 if cid not in count else count[cid] + 1
+    def getPort(p):
+        return str(p.__getstate__()[1][1])
+    def processToString(p):
+        mes=[]
+        for m in p:
+            if not isinstance(m,int) and not isinstance(m,str): mes.append(getPort(m))
+            else: mes.append(m)
+        return mes
+    def curTime():
+        return time.time()-t2
+
+def main():
+    nacceptors = int(sys.argv[1]) if len(sys.argv) > 1 else 3 # 8
+    nleaders = int(sys.argv[2]) if len(sys.argv) > 3 else 1 # 2
+    nreplicas = int(sys.argv[3]) if len(sys.argv) > 2 else 3 # 4
+    nclients = int(sys.argv[4]) if len(sys.argv) > 4 else 1 # 4
+    nops = int(sys.argv[5]) if len(sys.argv) > 5 else 2 # 2
+
+
+    acceptors = new(Acceptor, (), num= nacceptors)
+    replicas = new(Replica, num= nreplicas)
+    leaders = new(Leader, (acceptors, replicas), num= nleaders)
+    initial_state = [];  setup(replicas, (leaders, initial_state))
+    clients = new(Client, (replicas, nops), num= nclients)
+
+    start(acceptors)
+    start(replicas | leaders)
+    start(clients)
+
+    for c in clients: c.join()
+    print('done')
+    da.send(('done',), to= (acceptors|replicas|leaders))
+
+# This code includes setup and termination for each client to request and
+# complete a number of operations.
+
+# Not properly terminating when there are live Commanders or Scounts.
+# This happens usually when there are multiple leaders or clients;
+# adding count in client doesn't help.

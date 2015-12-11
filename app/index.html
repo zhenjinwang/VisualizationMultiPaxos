@@ -1,0 +1,69 @@
+<!doctype html>
+<html class="no-js" lang="">
+  <head>
+    <meta charset="utf-8">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>VR Multi Paxos</title>
+
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="/bower_components/jquery-ui/themes/smoothness/jquery-ui.css">
+    <link href='http://fonts.googleapis.com/css?family=Signika+Negative:300,400,700' rel='stylesheet' type='text/css'/>
+
+    <!-- endbuild -->
+
+    <!-- build:js scripts/vendor/modernizr.js -->
+    <script src="/bower_components/jquery/dist/jquery.js"></script>
+    <script src="/bower_components/jquery-ui/jquery-ui.js"></script>
+    <script src="/bower_components/modernizr/modernizr.js"></script>
+    <script src="scripts/bundle.js"></script>
+    <script src="scripts/main.js"></script>
+    <script src="scripts/animation.js"></script>
+  </head>
+  <body class='vrpaxos'>
+
+<div id='init_paxos' style="margin:auto">
+  <div class="tagline" style="margin-left:30px;color:green">VR Multi-Paxos</div>
+  <div style="margin-left:30px;font-size:30px;color:green">
+    Acceptor:
+    <input type="text" name="acceptor" value='3'>
+    Leader:
+    <input type="text" name="leader" value='1'>
+    Replica:
+    <input type="text" name="replica" value='3'>
+    Client:
+    <input type="text" name="client" value='1'>
+    <button id="initpaxos" onclick="initPaxos()"><strong>Initialize Paxos</strong></button>
+    <button id="reloadpaxos" onclick="reloadPaxos()"><strong>Reload Recent Data</strong></button>
+  </div>
+
+    <div id="controls">
+      <div class="sliderValues">Time:
+        <span id="time"></span>s |   Progress:
+        <span id="progress"></span> %
+        <span id="cpu_time">|  CPU Time:</span>S
+        <span id="elapse_time"> |  Elapse Time:</span>S
+      </div>
+      <div class="slider" id="progressSlider"></div>
+      <button id="playBtn"><strong>Play</strong></button>
+      <button id="pauseBtn"><strong>Pause</strong></button>
+      <button id="resumeBtn"><strong>Resume</strong></button>
+      <button id="reverseBtn"><strong>Reverse</strong></button>
+      <button id="restartBtn"><strong>Restart</strong></button>
+      <div style="text-align:left; width:420px; margin:auto">
+      <div class="slider" id="timeScaleSlider" style="display:inline-block"></div>
+      <div class="sliderValues" style="display:inline-block">time Scale:
+      <span id="timeScale" >3</span></div>
+      </div>
+    </div>
+</div>
+
+<div id="demo">
+  <div id='data'></div>
+</div>
+
+
+
+  </body>
+</html>

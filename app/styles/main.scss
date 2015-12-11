@@ -1,0 +1,169 @@
+body {
+  background-color:#1d1d1d;
+  color:#989898;
+  margin:0 10px;
+  font-size:16px;
+  margin-top:40px;
+  font-family: 'Signika Negative', sans-serif;
+
+}
+
+.product {
+  display:inline-block;
+  color:white;
+  font-size:60px;
+  font-weight:300;
+}
+
+.suffix {
+  display:inline-block;
+  font-size:60px;
+  font-weight:700;
+  color:#86CC01;
+  font-weight:700;
+}
+
+.tagline {
+  display:inline-block;
+  margin-left:20px;
+  font-size:36px;
+}
+
+#demo {
+  text-align:center;
+  position:relative;
+  visibility:hidden;
+}
+
+#controls {
+  margin-top:0px;
+  margin-left: 400px;
+}
+
+.slider {
+  width:500px;
+}
+.sliderValues {
+
+}
+
+.sliderValues span {
+  font-size:24px;
+}
+
+#timeScaleSlider {
+  width:500px;
+  margin-left: -530px;
+}
+#replica{
+  width:125px;
+  height:125px;
+  position: relative;
+  border-radius:100px;
+  font-size:18px;
+  color:black;
+  line-height:150px;
+  text-align:center;
+  background:yellow;
+}
+#acceptor{
+  width:125px;
+  height:125px;
+  position: relative;
+  border-radius:100px;
+  font-size:18px;
+  color:black;
+  line-height:150px;
+  text-align:center;
+  background:#00FF00;
+}
+#leader{
+  width:125px;
+  height:125px;
+  position: relative;
+  border-radius:100px;
+  font-size:18px;
+  color:black;
+  line-height:150px;
+  text-align:center;
+  background:#00FFFF;
+}
+#client{
+  width:125px;
+  height:125px;
+  position: relative;
+  border-radius:100px;
+  font-size:18px;
+  color:black;
+  line-height:150px;
+  text-align:center;
+  background:red;
+}
+#message{
+  background:white;
+  width:150px;
+  height:66px;
+  border-radius:10px;
+  position: relative;
+  font-size:18px;
+  color:red;
+  line-height:50px;
+  text-align:center;
+}
+
+button {
+  padding:1em;
+  margin:20px 0 10px 0;
+  font-size:12px;
+  cursor:pointer;
+}
+
+li {
+ display:inline-block;
+ margin-right:25px;
+  color:#aaa;
+}
+
+.ui-widget-content {
+  background-color:rgba(255, 255, 255, 0.2);
+}
+
+.link {
+  display:inline-block;
+  padding-top:20px;
+  text-decoration:none;
+}
+
+a.link:link, a.link:visited {
+  color:rgba(255, 100, 0, 0.3);
+}
+
+a.link:hover {
+  color:rgba(255, 100, 0, 0.95);
+}
+
+#init_paxos{
+  margin-top: 10px;
+}
+
+
+
+.circle {
+   width:125px;
+   height:125px;
+   position: relative;
+   border-radius:100px;
+   font-size:20px;
+   color:#fff;
+   line-height:150px;
+   text-align:center;
+   background:green;
+}
+#circle-a {
+  border-radius: 80%;
+  height: 40px;
+  position: relative;
+  width: 40px;
+  background: #86CC01;
+   text-align:center;
+}
