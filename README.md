@@ -1,7 +1,7 @@
 Visualization Of MultiPaxos
 
     A Node app to visualize the VR Multi Paxos, and it will be extended to visualize 
-    all distribute algorithms which are implemented in DistAlgo to help understand distributed algorithm.
+    all distributed algorithms which are implemented in DistAlgo to help understand them.
   
 Requirements:
     
@@ -40,6 +40,3 @@ More:
     Port 9000: To serve the front end ( A visualizer)
     Port 6000: A Master Server to centralize all the messages that are sent and received by Paxos Servers
     Port 5000: A bridge between front end and the node backend
-
-
-
