@@ -1,7 +1,7 @@
 Visualization Of MultiPaxos
 
     A Node app to visualize the VR Multi Paxos, and it will be extended to visualize 
-    all distribute algorithms which are implemented in DistAlgo to help understand distributed algorithm.
+    all distributed algorithms which are implemented in DistAlgo to help understand them.
   
 Requirements:
     
