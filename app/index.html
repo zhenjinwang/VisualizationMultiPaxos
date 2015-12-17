@@ -8,16 +8,17 @@
 
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="stylesheet" href="styles/main.css">
+
     <link rel="stylesheet" href="/bower_components/jquery-ui/themes/smoothness/jquery-ui.css">
     <link href='http://fonts.googleapis.com/css?family=Signika+Negative:300,400,700' rel='stylesheet' type='text/css'/>
-
-    <!-- endbuild -->
+   <!-- endbuild -->
 
     <!-- build:js scripts/vendor/modernizr.js -->
     <script src="/bower_components/jquery/dist/jquery.js"></script>
     <script src="/bower_components/jquery-ui/jquery-ui.js"></script>
     <script src="/bower_components/modernizr/modernizr.js"></script>
     <script src="scripts/bundle.js"></script>
+    <script src="scripts/sequenceChart.js"></script>
   </head>
   <body class='vrpaxos'>
 
@@ -52,13 +53,15 @@
       <div style="text-align:left; width:420px; margin:auto">
       <div class="slider" id="timeScaleSlider" style="display:inline-block"></div>
       <div class="sliderValues" style="display:inline-block">time Scale:
-      <span id="timeScale" >3</span></div>
+      <span id="timeScale" style="width:420px; margin:auto">3</span></div>
       </div>
     </div>
 </div>
 
-<div id="demo">
-  <div id='data'></div>
+<div id="demo" >
+
+  <div id='data' style="float:left"></div>
+
 </div>
 
 

@@ -73,5 +73,23 @@ app.get('/api/start/:acceptor/:leader/:replica/:client', function(req, res) {
     });
 });
 
+app.get('/api/start/:acceptor/:leader/:replica/:client', function(req, res) {
+    try{
+      var acceptor = parseInt(req.params.acceptor),
+          leader = parseInt(req.params.leader),
+          replica = parseInt(req.params.replica),
+          client = parseInt(req.params.client);
+    }catch(error){
+          //default setting
+          acceptor=3;
+          leader=1;
+          replica=3;
+          client=1;
+    }
+    messageController.startPaxosDriver(acceptor, leader, replica, client);
+    res.json({
+        'ready': true
+    });
+});
 http.listen(5000);
 console.log('start server 5000')

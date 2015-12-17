@@ -3,28 +3,28 @@ var replicas_num = 3,
     acceptors_num = 3,
     leaders_num = 1,
     clients_num = 1,
-    paxosTimeLine='init';
-
+    paxosTimeLine='init',
+    historySequenceChart=new SequenceChart();
 // visualizer
 function visualizer() {
     var bodyElement = $('#data'); //
-    
+
     //clean UI if needing
     if (paxosTimeLine!='init') {
         paxosTimeLine.clear();
         paxosTimeLine='init';
         bodyElement.empty();
     }
-    CSSPlugin.defaultTransformPerspective = 100;    
-    
+    CSSPlugin.defaultTransformPerspective = 100;
+
     // a map which stores the final position of each server
     // key: port         value: {'left':int,'top':int}
     // using to locate the start and final positions of each message based on the port number
     var serversPos = {};
-    
+
     // initial value for UI layout
     var className = 111,
-        left_offset = 100,
+        left_offset = 50,
         left_inc = 400,
         top_offset_init = 50,
         top_offset = 50,
@@ -50,6 +50,7 @@ function visualizer() {
     TweenLite.set("#demo", {
         visibility: "visible"
     });
+    historySequenceChart.init() ;
 
     // initialize paxos servers
     // use to adjust the top position of servers except the first column servers
@@ -69,6 +70,7 @@ function visualizer() {
             };
             top_offset += top_inc;
             className++;
+            historySequenceChart.addServer(obj.type,port);// add to history sequence chart
         }
         firstColumn = false;
         top_offset = top_inc;
@@ -78,7 +80,7 @@ function visualizer() {
     //initialize paxos messages
     var currentTime = 1.5, // the time to start to animate messages
         time_inc=0.5;// the duration between two different consecutive sets of messages
-        
+
     for (var i = 0; i < messages.length;) {
         if (messages[i].action == 'send') {
             var j = i + 1;
@@ -89,6 +91,9 @@ function visualizer() {
                     break;
                 }
             }
+            var toList=[],
+                labelList=[];
+
             for (var k = i; k < j; k++) {
                 var ele = createShape(messages[k].type + messageToString(messages[k].message), className, 'message');
                 var relativedPosition = getRelativedPosition(className);
@@ -105,19 +110,24 @@ function visualizer() {
                         opacity: 1
                     }, currentTime);
                 className++;
+                toList.push(messages[k].to);
+                labelList.push(messages[k].type + messageToString(messages[k].message));
             }
+            historySequenceChart.addMessages(messages[i].from,toList,labelList,messages[i].type);
             currentTime += time_inc;
             i = j;
         } else {
             i++;
         }
     }
+    //open a history sequence chart window 
+    historySequenceChart.openNewHistoryWindow();
 
     $("#progressSlider").slider({
         range: false,
         min: 0,
         max: 1,
-        step: .001,
+        step: 0.001,
         slide: function(event, ui) {
             paxosTimeLine.progress(ui.value).pause();
         }
@@ -164,14 +174,15 @@ function visualizer() {
             timeScale.html(ui.value)
         },
         change: function() {
+            // paused => wake up
             if (paxosTimeLine.paused()) {
                 paxosTimeLine.resume();
             }
-
+            // end => restart
             if (paxosTimeLine.progress() == 1) {
                 paxosTimeLine.restart();
             }
-
+            // beginning (only reverse method can reach the beginning)=> restart
             if (paxosTimeLine.reversed() && paxosTimeLine.progress() === 0) {
                 paxosTimeLine.restart();
             }
