@@ -2,14 +2,17 @@
 <!doctype html>
 <html>
   <head>
-    <title>VR Multi Paxos</title>
+    <title>Message History Sequence Chart</title>
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
-     <script src='https://sverweij.github.io/mscgen_js/mscgen-inpage.js'></script>
+
+
   </head>
   <body class='vrpaxos'>
+    <button id="loadHistory"><strong>Load Message History Sequence Chart</strong></button>
     <div id='sequenceChart' style="float:center">
-       <pre id='data' class='code mscgen mscgen_js' data-language='mscgen'>
-       </pre>
+
      </div>
+     <script src="/bower_components/jquery/dist/jquery.js"></script>
+     <script src="scripts/history.js"></script>
   </body>
 </html>

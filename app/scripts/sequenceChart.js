@@ -65,26 +65,8 @@ SequenceChart.prototype.setting=function(label,color){
 SequenceChart.prototype.typeSetting=function(label,color){
       return '[label="'+label+'", linecolor="transparent" , textcolor="'+color+'" ]';
 }
-// creating a new window to show the history sequence chart 
-SequenceChart.prototype.openNewHistoryWindow=function(){
+// creating a new window to show the history sequence chart
+SequenceChart.prototype.saveToLocalStorage=function(){
    //window.open("", "", "width=200, height=100");
-   var historyWindow=window.open('');
-   historyWindow.document.write(
-     '<!doctype html>'+
-     '<html>'+
-       '<head>'+
-         '<title>VR Multi Paxos</title>'+
-         '<link rel="apple-touch-icon" href="apple-touch-icon.png">'+
-         '<script src="https://sverweij.github.io/mscgen_js/mscgen-inpage.js"></script>'+
-         '<style>body {background-color:lightgrey;}</style>'+
-       '</head>'+
-       '<body class="vrpaxos">'+
-         '<div id="sequenceChart" style="float:center">'+
-          '<pre id="data" class="code mscgen mscgen_js" data-language="mscgen">'+
-            this.getContent()+
-            '</pre>'+
-          '</div>'+
-       '</body>'+
-     '</html>'
-   );
+   localStorage.setItem('messageHistory',this.getContent());
 }

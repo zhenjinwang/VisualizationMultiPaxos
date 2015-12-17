@@ -120,8 +120,8 @@ function visualizer() {
             i++;
         }
     }
-    //open a history sequence chart window
-    historySequenceChart.openNewHistoryWindow();
+    //save the history sequence chart text to local storage
+    historySequenceChart.saveToLocalStorage();
 
     $("#progressSlider").slider({
         range: false,
