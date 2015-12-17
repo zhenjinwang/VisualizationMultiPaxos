@@ -120,7 +120,7 @@ function visualizer() {
             i++;
         }
     }
-    //open a history sequence chart window 
+    //open a history sequence chart window
     historySequenceChart.openNewHistoryWindow();
 
     $("#progressSlider").slider({
