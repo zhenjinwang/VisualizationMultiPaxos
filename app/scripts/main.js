@@ -2,10 +2,12 @@ var messages = '',
     servers = '',
     cpu_time = 0,
     elapse_time = 0,
-    delay_call = 500;
+    DELAY_CALL = 500;
 
-    
-    
+$("#openHistory").on("click", function() {
+            window.open('history.html');
+    });
+
 $("#initpaxos").on("click", function() {
         initPaxos();
     });
@@ -56,7 +58,7 @@ function getData() {
         success: function(data, textStatus, jqXHR) {
             messages = data.data;
             if (messages.length == 0) {
-                setTimeout(getData, delay_call);
+                setTimeout(getData, DELAY_CALL);
             } else {
                 servers = data.servers;
                 cpu_time = data.cpu_time;
@@ -83,7 +85,7 @@ function startPaxos() {
             '/' + replicas_num + '/' + clients_num,
         method: "GET",
         success: function(data, textStatus, jqXHR) {
-            setTimeout(getData, 5 * delay_call);
+            setTimeout(getData, 5 * DELAY_CALL);
         },
         error: function(jqXHR, textStatus, errorThrown) {},
         complete: function(jqXHR, status) {

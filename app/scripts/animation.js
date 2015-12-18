@@ -28,8 +28,8 @@ function visualizer() {
         left_inc = 400,
         top_offset_init = 50,
         top_offset = 50,
-        top_inc = 250,
-        top_offset_adjust = -200,
+        top_inc = 200,
+        top_offset_adjust = -150,
         message_offset = 100;
     // the buttons and lines of control bar
     var playBtn = $("#playBtn"),
@@ -50,7 +50,6 @@ function visualizer() {
     TweenLite.set("#demo", {
         visibility: "visible"
     });
-    historySequenceChart.init() ;
 
     // initialize paxos servers
     // use to adjust the top position of servers except the first column servers
@@ -70,7 +69,6 @@ function visualizer() {
             };
             top_offset += top_inc;
             className++;
-            historySequenceChart.addServer(obj.type,port);// add to history sequence chart
         }
         firstColumn = false;
         top_offset = top_inc;
@@ -91,9 +89,6 @@ function visualizer() {
                     break;
                 }
             }
-            var toList=[],
-                labelList=[];
-
             for (var k = i; k < j; k++) {
                 var ele = createShape(messages[k].type + messageToString(messages[k].message), className, 'message');
                 var relativedPosition = getRelativedPosition(className);
@@ -110,16 +105,18 @@ function visualizer() {
                         opacity: 1
                     }, currentTime);
                 className++;
-                toList.push(messages[k].to);
-                labelList.push(messages[k].type + messageToString(messages[k].message));
             }
-            historySequenceChart.addMessages(messages[i].from,toList,labelList,messages[i].type);
             currentTime += time_inc;
             i = j;
         } else {
             i++;
         }
     }
+
+    // initialize historySequenceChart
+    historySequenceChart.init() ;
+    // generating message history sequence chart
+    historySequenceChart.generateSequenceChart(servers,messages);
     //save the history sequence chart text to local storage
     historySequenceChart.saveToLocalStorage();
 
@@ -141,7 +138,7 @@ function visualizer() {
 
     function updateTime() {
         cpuTime.html('CPU Time: ' + cpu_time);
-        elapseTime.html('Elapse Time: ' + elapse_time);
+        elapseTime.html('Elapsed Time: ' + elapse_time);
     }
     $("#playBtn").on("click", function() {
         paxosTimeLine.play();
@@ -197,27 +194,27 @@ function visualizer() {
         bodyElement.append(element);
         return '.' + className;
     }
-    // convert message array to string
-    function messageToString(message) {
-        if (message.length == 0) return "";
-        var str = '( ';
-        for (var i = 0; i < message.length; i++) {
-            if (Array.isArray(message[i])) {
-                str += messageToString(message[i]);
-            } else {
-                str += message[i] + ',';
-            }
-        }
-        str += ' )';
-        return str;
-    }
-    // get the relatived position of the first dom element by class name
-    function getRelativedPosition(className) {
+}
+
+// get the relatived position of the first dom element by class name
+function getRelativedPosition(className) {
         var element = document.getElementsByClassName(className)[0];
         return {
             'left': element.offsetLeft,
             'top': element.offsetTop
         };
+}
+// convert message array to string
+function messageToString(message) {
+    if (message.length == 0) return "";
+    var str = '( ';
+    for (var i = 0; i < message.length; i++) {
+        if (Array.isArray(message[i])) {
+            str += messageToString(message[i]);
+        } else {
+            str += message[i] + ',';
+        }
     }
-
+    str += ' )';
+    return str;
 }

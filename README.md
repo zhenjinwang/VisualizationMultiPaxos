@@ -34,12 +34,12 @@ UI: demo_UI.PNG
 
   ![alt tag](https://github.com/zhenjinwang/VisualizationMultiPaxos/blob/master/demo_UI.PNG)  
 Message Sequence Chart:
-  ![alt tag](https://github.com/zhenjinwang/VisualizationMultiPaxos/blob/master/history_sequence_chart.PNG) 
+  ![alt tag](https://github.com/zhenjinwang/VisualizationMultiPaxos/blob/master/history_sequence_chart.PNG)
 
 
 More:
 
     This app will start three servers: 5000,6000, and 9000
-    Port 9000: To serve the front end ( A visualizer)
+    Port 9000: To serve the front end ( A visualizer and A message sequence chart generator)
     Port 6000: A Master Server to centralize all the messages that are sent and received by Paxos Servers
     Port 5000: A bridge between front end and the node backend

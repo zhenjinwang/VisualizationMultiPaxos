@@ -1,7 +1,7 @@
 module.exports = function() {
     var exec = require('child_process').exec,
         paxos_driver = 'init',
-        cmd = 'py -m da ../DistAlgoCompiler/distalgo/examples/vrpaxos/orig.da',
+        cmd = 'py -m da app/DistAlgoCompiler/distalgo-master/examples/vrpaxos/orig.da ',
         fs = require('fs');
 
     var messagesQueue = [],
@@ -33,7 +33,9 @@ module.exports = function() {
         client = 1,
         totalServers = 8,
         totalCPUTime = 0,
-        totalElapseTime = 0,
+        totalElapsedTime = 0,
+        cpuTime=0,
+        elapsedTime=0,
         status = false;
     // start paxos driver to produce real time message log
     this.startPaxosDriver = function(acceptor_num, leader_num, replica_num, client_num) {
@@ -46,7 +48,7 @@ module.exports = function() {
         totalServers = acceptor + leader + replica + client;
         count_done = 0;
         totalCPUTime = 0;
-        totalElapseTime = 0;
+        totalElapsedTime = 0;
         messagesQueue = [];
         servers = [{
             'type': 'acceptor',
@@ -75,14 +77,16 @@ module.exports = function() {
         if (message.action == 'done') {
             count_done++;
             totalCPUTime += message.message[1];
-            totalElapseTime += message.message[2];
+            totalElapsedTime += message.message[2];
             console.log('count done' + count_done);
             if (count_done == totalServers) {
+                cpuTime=totalCPUTime / totalServers;
+                elapsedTime=totalElapsedTime / totalServers;
                 this.saveMessageLog({
                     'data': messagesQueue,
                     'servers': servers,
-                    'cpu_time': totalCPUTime / totalServers,
-                    'elapse_time': totalElapseTime / totalServers
+                    'cpu_time': cpuTime,
+                    'elapse_time': elapsedTime
                 });
             }
         } else {
@@ -100,12 +104,7 @@ module.exports = function() {
         console.log(totalServers + ' ' + count_done + ' ' + leader);
         status=false;
         this.killProcess();
-        return {
-            'data': messagesQueue,
-            'servers': servers,
-            'cpu_time': totalCPUTime / totalServers,
-            'elapse_time': totalElapseTime / totalServers
-        };
+        return this.messageLogObject();
     }
     //return a empty message log object
     this.emptyMessageLog = function() {
@@ -122,17 +121,28 @@ module.exports = function() {
     }
     //read message log object from local storage
     this.readMessageLog = function() {
+        if(messagesQueue.length>0){
+            return this.messageLogObject();
+        }
         try {
             var content = JSON.parse(fs.readFileSync("app/Data/paxosData.json"));
-            return {
-                'data': content.data,
-                'servers': content.servers,
-                'cpu_time': content.cpu_time,
-                'elapse_time': content.elapse_time
-            };
+            messagesQueue=content.data;
+            servers=content.servers;
+            cpuTime=content.cpu_time;
+            elapsedTime=content.elapsedTime;
+            return this.messageLogObject();
         } catch (e) {
             return this.emptyMessageLog();
         }
+    }
+    // get mesage log object
+    this.messageLogObject=function(){
+      return {
+          'data': messagesQueue,
+          'servers': servers,
+          'cpu_time': cpuTime,
+          'elapse_time': elapsedTime
+      };
     }
     // kill the child process which runs paxos driver
     this.killProcess = function() {
@@ -141,11 +151,10 @@ module.exports = function() {
             console.log('kill child process');
         }
     }
-    // execute the paxos driver 
+    // execute the paxos driver
     this.execPaxosDriver = function(acceptor, leader, replica, client) {
         this.killProcess(); // to make sure previous child process is killed
-        paxos_driver = exec('py -m da app/DistAlgoCompiler/distalgo-master/examples/vrpaxos/orig.da ' +
-            acceptor + ' ' + leader + ' ' + replica + ' ' + client,
+        paxos_driver = exec(cmd +acceptor + ' ' + leader + ' ' + replica + ' ' + client,
             function(err, out, code) {
                 console.log('finish');
                 return 'init';

@@ -1,4 +1,4 @@
-// convert message queue to MSCGEn style text to show message sequence chart
+// convert message queue to MSCGEN style text to show message sequence chart
 var SequenceChart=function(){
       this.firstServer='0 [arclinecolor="transparent", arctextcolor="transparent", linecolor="transparent", textcolor="transparent"]';
       this.servers='';
@@ -6,8 +6,8 @@ var SequenceChart=function(){
       this.initialSetting='hscale="0.6", arcgradient="18", wordwraparcs="false";';
       this.mapping={};
       this.id=1;
-      this.colors=['#ff0000','#000033','#0000ff','#7f00ff','#ff00ff','#ff0000',
-              '#000000','#8c0000'];
+      this.colors=['#ff0000','#00FFFF','#000033','#0000ff','#8A2BE2','#800080',
+                  '#F4A460','#7f00ff','#ff00ff','#000000','#8c0000'];
       this.serverColorId=0;
       this.messageColorId=0;
 };
@@ -20,6 +20,39 @@ SequenceChart.prototype.init=function(){
       this.messageColorId=0;
       this.id=1;
 }
+//generate message sequence chart
+// messages: a list of message object
+SequenceChart.prototype.generateSequenceChart=function(servers,messages){
+  for (var obj of servers) {
+      for (var port of obj.ports) {
+          this.addServer(obj.type,port);// add to history sequence chart
+      }
+  }
+
+  for (var i = 0; i < messages.length;) {
+      if (messages[i].action == 'send') {
+          var j = i + 1;
+          for (var j = i + 1; j < messages.length;) {
+              if (messages[j].action == 'send' && messages[j].type == messages[i].type &&
+                  messages[j].from == messages[i].from) {
+                  j++;
+              } else {
+                  break;
+              }
+          }
+          var toList=[],
+              labelList=[];
+          for (var k = i; k < j; k++) {
+              toList.push(messages[k].to);
+              labelList.push(messages[k].type + messageToString(messages[k].message));
+          }
+          this.addMessages(messages[i].from,toList,labelList,messages[i].type);
+          i = j;
+      } else {
+          i++;
+      }
+  }
+}
 // return MSCGEN style text
 SequenceChart.prototype.getContent=function(){
     return 'msc{\n'+this.initialSetting+'\n\n'+this.firstServer+''+this.servers+';\n'+this.messages+'\n}';
@@ -28,7 +61,7 @@ SequenceChart.prototype.getContent=function(){
 //add server message
 SequenceChart.prototype.addServer=function(type,port){
       var index=0;
-      if(this.mapping[type]){
+      if(this.mapping[type]>=0){
         index=this.mapping[type];
       }else{
         index=this.serverColorId;
@@ -42,7 +75,7 @@ SequenceChart.prototype.addServer=function(type,port){
 // add content message
 SequenceChart.prototype.addMessages=function(from,toList,labelList,type){
     var index=0;
-    if(this.mapping[type]){
+    if(this.mapping[type]>=0){// 0 is false
       index=this.mapping[type];
     }else{
       index=this.messageColorId;
@@ -65,8 +98,7 @@ SequenceChart.prototype.setting=function(label,color){
 SequenceChart.prototype.typeSetting=function(label,color){
       return '[label="'+label+'", linecolor="transparent" , textcolor="'+color+'" ]';
 }
-// creating a new window to show the history sequence chart
+// save history to localStorage
 SequenceChart.prototype.saveToLocalStorage=function(){
-   //window.open("", "", "width=200, height=100");
    localStorage.setItem('messageHistory',this.getContent());
 }

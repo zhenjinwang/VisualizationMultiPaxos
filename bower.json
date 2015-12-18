@@ -15,6 +15,7 @@
     }
   },
   "devDependencies": {
-    "jquery-ui": "~1.11.4"
+    "jquery-ui": "~1.11.4",
+    "mscgen_js-inpage-package": "~1.2.4"
   }
 }

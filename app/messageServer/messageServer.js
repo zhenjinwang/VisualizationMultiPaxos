@@ -4,7 +4,7 @@
 var net = require('net');
 var server = net.createServer();
 var controller = require('../messageServer/messageController'),
-// each user has one messageController instance. It can be easily extended to support multi-user
+// each user has one messageController instance.
     messageController = new controller();
 
 server.on('connection', function(socket) {
