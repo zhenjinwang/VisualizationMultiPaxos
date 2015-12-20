@@ -3,7 +3,12 @@ drawSequenceChart(1);
 
 // load sequence chart
 $("#loadHistory").on("click", function() {
-        drawSequenceChart(1);
+    drawSequenceChart(1);
+});
+
+// back to top
+$("#back_to_top").on("click", function() {
+    window.scrollTo(0,0);
 });
 
 // draw sequence chart
