@@ -6,6 +6,16 @@ $("#loadHistory").on("click", function() {
         drawSequenceChart(1);
 });
 
+// draw sequence chart
+function drawSequenceChart(zoomRatio){
+  $('#sequenceChart').empty();
+  $('#sequenceChart').append(
+    "<pre id='data' class='code mscgen mscgen_js' data-language='mscgen' style='zoom:"+zoomRatio+"'>"+
+      localStorage.getItem('messageHistory')+"</pre>"+
+      "<script src='/bower_components/mscgen_js-inpage-package/mscgen-inpage.js'></script>"
+  );
+}
+
 //Jquery element for zooming  ratio
 var ratio=$("#zooming");
 
@@ -20,16 +30,6 @@ $("#zoomSlider").slider({
         // update zooming ratio
         ratio.html(ui.value);
         // update sequence chart
-        drawSequenceChart(ui.value);
+        $("#data").css("zoom",ui.value);
     }
 });
-
-// draw sequence chart
-function drawSequenceChart(zoomRatio){
-  $('#sequenceChart').empty();
-  $('#sequenceChart').append(
-    "<pre id='data' class='code mscgen mscgen_js' data-language='mscgen' style='zoom:"+zoomRatio+"'>"+
-      localStorage.getItem('messageHistory')+"</pre>"+
-      "<script src='/bower_components/mscgen_js-inpage-package/mscgen-inpage.js'></script>"
-  );
-}
