@@ -1,11 +1,34 @@
-drawSequenceChart();
+//initial sequence chart with ratio 1
+drawSequenceChart(1);
+
+// load sequence chart
 $("#loadHistory").on("click", function() {
-        drawSequenceChart();
+        drawSequenceChart(1);
 });
-function drawSequenceChart(){
+
+//Jquery element for zooming  ratio
+var ratio=$("#zooming");
+
+// zooming ratio slider
+$("#zoomSlider").slider({
+    range: false,
+    value:1,
+    min: 0.05,
+    max: 4,
+    step: 0.01,
+    slide: function(event, ui) {
+        // update zooming ratio
+        ratio.html(ui.value);
+        // update sequence chart
+        drawSequenceChart(ui.value);
+    }
+});
+
+// draw sequence chart
+function drawSequenceChart(zoomRatio){
   $('#sequenceChart').empty();
   $('#sequenceChart').append(
-    "<pre id='data' class='code mscgen mscgen_js' data-language='mscgen'>"+
+    "<pre id='data' class='code mscgen mscgen_js' data-language='mscgen' style='zoom:"+zoomRatio+"'>"+
       localStorage.getItem('messageHistory')+"</pre>"+
       "<script src='/bower_components/mscgen_js-inpage-package/mscgen-inpage.js'></script>"
   );

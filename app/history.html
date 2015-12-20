@@ -4,13 +4,22 @@
   <head>
     <title>Message History Sequence Chart</title>
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="stylesheet" href="/bower_components/jquery-ui/themes/smoothness/jquery-ui.css">
+    <script src="/bower_components/jquery/dist/jquery.js"></script>
+    <script src="/bower_components/jquery-ui/jquery-ui.js"></script>
+
   </head>
   <body class='vrpaxos'>
-    <button id="loadHistory"><strong>Load Message History Sequence Chart</strong></button>
-    <div id='sequenceChart' style="float:center">
+    <div class='load button'>
+      <button id="loadHistory"><strong>Load Message History Sequence Chart</strong></button>
+    </div>
+    <br>
+    <div class='zooming bar'>
+        <span ><strong>Zooming Ratio [0.05 -- 4]:</strong></span><span id="zooming"> 1</span>
+        <div class="slider" id="zoomSlider" style="top:-15px;left:220px;width:600px"></div>
+    </div>
+    <div id='sequenceChart' style="zoom:1"></div>
 
-     </div>
-     <script src="/bower_components/jquery/dist/jquery.js"></script>
      <script src="scripts/history.js"></script>
   </body>
 </html>

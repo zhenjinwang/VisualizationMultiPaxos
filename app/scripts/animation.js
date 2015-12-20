@@ -161,7 +161,7 @@ function visualizer() {
     });
 
     $("#timeScaleSlider").slider({
-        value: 3,
+        value: 1,
         range: false,
         min: 0.1,
         max: 3,
